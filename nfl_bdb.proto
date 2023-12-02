@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+/*
+Notes
+- home endzone matters for orientation
+  - don't you switch which way you're trying to score?
+- can this be solved by knowing the play direction?
+  - does it actually matter?
+*/
+
+message SnapshotMetadata {
+	int64 game_id = 1;
+	int64 play_id = 2;
+	int64 frame_id = 3;
+
+	float x = 4;
+	float y = 5;
+	float velocity = 6;  // yards/second
+	float acceleration = 7;  // yards/second^2
+
+	// figure out how angles provided work, re: home/away endzones
+	float orientation = 8;  // in radians; `o` in Kaggle
+	float direction = 9;  // in radians; `dir` in Kaggle
+
+	// Time stamp of play (time, yyyy-mm-dd, hh:mm:ss)
+	google.protobuf.Timestamp timestamp = 10;  // remove? see PlayFrame.timestamp
+}
+
+message PlayerSnapshot {
+	SnapshotMetadata metadata = 1;
+	int64 nfl_id = 2;
+	string uuid = 3;  // naively, "{game_id}_{play_id}_{frame_id}_{nfl_id}"
+
+	// Join from `Player data`
+	float weight = 4;  // to be used for momentum in phase space.
+}
+
+message BallSnapshot {
+	SnapshotMetadata metadata = 1;
+	string uuid = 2;  // naively, "{game_id}_{play_id}_{frame_id}_BALL"
+}
+
+// PlayFrame represents
+message PlayFrame {
+	repeated PlayerSnapshot player_snapshots = 1;  // 22 in total
+	BallSnapshot ball_snapshot = 2;
+
+	// Time stamp of play (time, yyyy-mm-dd, hh:mm:ss); theoretically, this
+	// matches the timestamp in {p \in player_snapshots | p.timestamp}
+	google.protobuf.Timestamp timestamp = 3;
+}
+
+// Play represents a single NFL game play agnostic of team and players.
+message Play {
+	int64 game_id = 1;
+	int64 play_id = 2;
+	string uuid = 3;  // naively, "{game_id}_{play_id}"
+
+	// nflId of the ball carrier (receiver of the handoff, receiver of pass or
+	// the QB scrambling) on the play. This is the player that the defense is
+	// attempting to tackle.
+	int64 ball_carrier_nfl_id = 4;  // `ballCarrierId` in Kaggle
+
+	int64 yards_to_first_down = 5;  // `yardsToGo` in Kaggle
+
+	// use enums?
+	int64 game_quarter = 6;  // `quarter` in Kaggle
+	int64 play_down = 7;  //  `down` in Kaggle
+
+	string game_clock = 8;  // MM:SS
+
+	enum PassResult {
+		COMPLETE = 0;
+		INCOMPLETE = 1;
+		SACK = 2;
+		INTERCEPTION = 3;
+		SCRAMBLE = 4;
+	}
+	PassResult pass_result = 9;
+
+	// TODO(nealpatel): Verify that these are not floats
+	int64 yards_gained = 10;  // `prePenaltyPlayResult` in Kaggle
+	int64 yards_lost = 11;  // `penaltyYards` in Kaggle
+	int64 yards_net = 12;  // `playResult` in Kaggle
+
+	// Derived from joining `Tackles Data`
+	bool ended_in_tackle = 13;  // assumes number of tacklers per play in range [0, 1]
+	int64 missed_tackles = 14;
+	int64 tackle_assists = 15;  // number of players assisting in tackle
+
+	repeated PlayFrame frames = 16;
+}
+
+// Desired output in wire format to be used in the "polytope algorithm."
+message Data {
+  repeated Play nfl_plays = 1;
+}
