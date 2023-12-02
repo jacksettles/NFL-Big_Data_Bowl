@@ -22,8 +22,8 @@ message SnapshotMetadata {
 	float orientation = 8;  // in radians; `o` in Kaggle
 	float direction = 9;  // in radians; `dir` in Kaggle
 
-	// Time stamp of play (time, yyyy-mm-dd, hh:mm:ss)
-	google.protobuf.Timestamp timestamp = 10;  // remove? see PlayFrame.timestamp
+	// Time stamp of play (time, yyyy-mm-dd, hh:mm:ss.us)
+	string timestamp = 10;  // remove? see PlayFrame.timestamp
 }
 
 message PlayerSnapshot {
@@ -45,9 +45,9 @@ message PlayFrame {
 	repeated PlayerSnapshot player_snapshots = 1;  // 22 in total
 	BallSnapshot ball_snapshot = 2;
 
-	// Time stamp of play (time, yyyy-mm-dd, hh:mm:ss); theoretically, this
+	// Time stamp of play (time, yyyy-mm-dd, hh:mm:ss.us); theoretically, this
 	// matches the timestamp in {p \in player_snapshots | p.timestamp}
-	google.protobuf.Timestamp timestamp = 3;
+	string timestamp = 3;
 }
 
 // Play represents a single NFL game play agnostic of team and players.
