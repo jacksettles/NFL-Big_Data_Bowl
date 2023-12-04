@@ -13,14 +13,14 @@ message SnapshotMetadata {
 	int64 play_id = 2;
 	int64 frame_id = 3;
 
-	float x = 4;
-	float y = 5;
-	float velocity = 6;  // yards/second
-	float acceleration = 7;  // yards/second^2
+	double x = 4;
+	double y = 5;
+	double velocity = 6;  // yards/second
+	double acceleration = 7;  // yards/second^2
 
 	// figure out how angles provided work, re: home/away endzones
-	float orientation = 8;  // in radians; `o` in Kaggle
-	float direction = 9;  // in radians; `dir` in Kaggle
+	double orientation = 8;  // in radians; `o` in Kaggle
+	double direction = 9;  // in radians; `dir` in Kaggle
 
 	// Time stamp of play (time, yyyy-mm-dd, hh:mm:ss.us)
 	string timestamp = 10;  // remove? see PlayFrame.timestamp
@@ -32,7 +32,7 @@ message PlayerSnapshot {
 	string uuid = 3;  // naively, "{game_id}_{play_id}_{frame_id}_{nfl_id}"
 
 	// Join from `Player data`
-	float weight = 4;  // to be used for momentum in phase space.
+	double weight = 4;  // to be used for momentum in phase space.
 }
 
 message BallSnapshot {
@@ -78,7 +78,7 @@ message Play {
 	}
 	PassResult pass_result = 9;
 
-	// TODO(nealpatel): Verify that these are not floats
+	// TODO(nealpatel): Verify that these are not doubles
 	int64 yards_gained = 10;  // `prePenaltyPlayResult` in Kaggle
 	int64 yards_lost = 11;  // `penaltyYards` in Kaggle
 	int64 yards_net = 12;  // `playResult` in Kaggle
